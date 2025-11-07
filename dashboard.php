@@ -21,34 +21,34 @@ if (!isset($_SESSION['user'])) {
     
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-blue-600 text-3xl mb-2"></div>
+      <a href="calendar.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
+        <div class="text-blue-600 text-3xl mb-2">📚</div>
         <h3 class="text-xl font-bold">5 Courses</h3>
         <p class="text-gray-600">Active this semester</p>
-      </div>
+      </a>
       
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-green-600 text-3xl mb-2"></div>
+      <a href="assignment.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
+        <div class="text-green-600 text-3xl mb-2">✅</div>
         <h3 class="text-xl font-bold">3 Pending</h3>
         <p class="text-gray-600">Assignments due</p>
-      </div>
+      </a>
       
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-purple-600 text-3xl mb-2"></div>
+      <a href="quiz.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
+        <div class="text-purple-600 text-3xl mb-2">📝</div>
         <h3 class="text-xl font-bold">2 Quizzes</h3>
         <p class="text-gray-600">Scheduled this week</p>
-      </div>
+      </a>
       
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="text-orange-600 text-3xl mb-2"></div>
+      <a href="chat_realtime.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
+        <div class="text-orange-600 text-3xl mb-2">💬</div>
         <h3 class="text-xl font-bold">8 Messages</h3>
         <p class="text-gray-600">Unread notifications</p>
-      </div>
+      </a>
     </div>
 
     <!-- Recent Activity -->
     <div class="bg-white rounded-lg shadow p-6 mb-8">
-      <h3 class="text-2xl font-bold mb-4"> Recent Activity</h3>
+      <h3 class="text-2xl font-bold mb-4">📌 Recent Activity</h3>
       <div class="space-y-4">
         <div class="border-l-4 border-blue-500 pl-4 py-2">
           <p class="font-semibold">New assignment posted in Database Management</p>
@@ -68,21 +68,29 @@ if (!isset($_SESSION['user'])) {
     <!-- Quick Links -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-bold mb-4"> Quick Actions</h3>
+        <h3 class="text-xl font-bold mb-4">🚀 Quick Actions</h3>
         <div class="space-y-2">
-          <a href="assignment.php" class="block p-3 bg-blue-50 rounded hover:bg-blue-100">Submit Assignment</a>
-          <a href="quiz.php" class="block p-3 bg-green-50 rounded hover:bg-green-100">Take Quiz</a>
-          <a href="e-books.php" class="block p-3 bg-purple-50 rounded hover:bg-purple-100">Browse E-Books</a>
-          <a href="chat.php" class="block p-3 bg-orange-50 rounded hover:bg-orange-100">Message Teacher</a>
+          <a href="assignment.php" class="block p-3 bg-blue-50 rounded hover:bg-blue-100 transition cursor-pointer">
+            📤 Submit Assignment
+          </a>
+          <a href="quiz.php" class="block p-3 bg-green-50 rounded hover:bg-green-100 transition cursor-pointer">
+            📝 Take Quiz
+          </a>
+          <a href="e-books.php" class="block p-3 bg-purple-50 rounded hover:bg-purple-100 transition cursor-pointer">
+            📚 Browse E-Books
+          </a>
+          <a href="chat_realtime.php" class="block p-3 bg-orange-50 rounded hover:bg-orange-100 transition cursor-pointer">
+            💬 Message Teacher
+          </a>
         </div>
       </div>
 
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-xl font-bold mb-4">📅 Upcoming Events</h3>
         <ul class="space-y-3 text-gray-700">
-          <li><strong>Today</strong> - </li>
-          <li><strong>Tomorrow</strong> - </li>
-          <li><strong>Friday</strong> - </li>
+          <li>🔴 <strong>Today</strong> - Lab Session: Data Structures (2:00 PM)</li>
+          <li>🟡 <strong>Tomorrow</strong> - Assignment Due: Web Design Project</li>
+          <li>🟢 <strong>Friday</strong> - Midterm Exam: Software Engineering</li>
         </ul>
       </div>
     </div>
