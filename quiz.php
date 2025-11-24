@@ -21,7 +21,7 @@ if (!isset($_SESSION['user'])) {
     <ul class="flex space-x-6">
         <li><a href="/PLMUN%20LMS/dashboard.php" class="hover:text-yellow-300">Dashboard</a></li>
         <li><a href="/PLMUN%20LMS/announcement.php" class="hover:text-yellow-300">Announcements</a></li>
-        <li><a href="/PLMUN%20LMS/chat_realtime.php" class="hover:text-yellow-300">Chat</a></li>
+        <li><a href="/PLMUN%20LMS/chat.php" class="hover:text-yellow-300">Chat</a></li>
         <li><a href="/PLMUN%20LMS/assignment.php" class="hover:text-yellow-300">Assignments</a></li>
         <li><a href="/PLMUN%20LMS/calendar.php" class="hover:text-yellow-300">Calendar</a></li>
         <li><a href="/PLMUN%20LMS/e-books.php" class="hover:text-yellow-300">E-Books</a></li>
