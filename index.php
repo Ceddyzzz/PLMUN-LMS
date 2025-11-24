@@ -25,7 +25,7 @@ if (isset($_SESSION['user'])) {
   <nav class="bg-white bg-opacity-10 backdrop-blur-lg border-b border-white border-opacity-20">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
       <div class="flex items-center space-x-2">
-        <span class="text-3xl">🎓</span>
+        <span class="text-3xl"></span>
         <h1 class="text-2xl font-bold text-white">PLMUN LMS</h1>
       </div>
       <div class="space-x-4">
