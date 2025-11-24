@@ -32,7 +32,7 @@ if (!isset($_SESSION['user'])) {
     <ul class="flex space-x-6">
         <li><a href="/PLMUN%20LMS/dashboard.php" class="hover:text-yellow-300">Dashboard</a></li>
         <li><a href="/PLMUN%20LMS/announcement.php" class="hover:text-yellow-300">Announcements</a></li>
-        <li><a href="/PLMUN%20LMS/chat_realtime.php" class="hover:text-yellow-300">Chat</a></li>
+        <li><a href="/PLMUN%20LMS/chat.php" class="hover:text-yellow-300">Chat</a></li>
         <li><a href="/PLMUN%20LMS/assignment.php" class="hover:text-yellow-300">Assignments</a></li>
         <li><a href="/PLMUN%20LMS/calendar.php" class="hover:text-yellow-300">Calendar</a></li>
         <li><a href="/PLMUN%20LMS/e-books.php" class="hover:text-yellow-300">E-Books</a></li>
@@ -47,7 +47,7 @@ if (!isset($_SESSION['user'])) {
       <h2 class="text-3xl font-bold">📅 Calendar</h2>
       <div class="flex items-center space-x-4">
         <button class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">← Previous</button>
-        <span class="text-xl font-semibold">October 2025</span>
+        <span class="text-xl font-semibold">November 2025</span>
         <button class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">Next →</button>
       </div>
     </div>
@@ -83,18 +83,12 @@ if (!isset($_SESSION['user'])) {
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">2</span>
-            <div class="mt-1">
-              <div class="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded mb-1">Lab 2PM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">3</span>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">4</span>
-            <div class="mt-1">
-              <div class="text-xs bg-green-100 text-green-800 px-1 py-0.5 rounded mb-1">Quiz 10AM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">5</span>
@@ -111,9 +105,6 @@ if (!isset($_SESSION['user'])) {
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">9</span>
-            <div class="mt-1">
-              <div class="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded mb-1">Lab 2PM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">10</span>
@@ -136,9 +127,6 @@ if (!isset($_SESSION['user'])) {
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">16</span>
-            <div class="mt-1">
-              <div class="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded mb-1">Lab 2PM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">17</span>
@@ -159,15 +147,9 @@ if (!isset($_SESSION['user'])) {
           <!-- Today -->
           <div class="calendar-day border-2 border-blue-600 bg-blue-50 rounded p-2">
             <span class="text-sm font-bold text-blue-600">22</span>
-            <div class="mt-1">
-              <div class="text-xs bg-purple-100 text-purple-800 px-1 py-0.5 rounded mb-1">Event 3PM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">23</span>
-            <div class="mt-1">
-              <div class="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded mb-1">Lab 2PM</div>
-            </div>
           </div>
           <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
             <span class="text-sm font-semibold">24</span>
@@ -252,9 +234,9 @@ if (!isset($_SESSION['user'])) {
           <h3 class="text-xl font-bold mb-4">Today's Schedule</h3>
           <div class="space-y-3">
             <div class="border-l-4 border-purple-500 pl-3 py-2">
-              <p class="font-semibold text-sm">AI Guest Lecture</p>
-              <p class="text-xs text-gray-600">3:00 PM - 5:00 PM</p>
-              <p class="text-xs text-gray-600">Innovation Hub</p>
+              <p class="font-semibold text-sm"></p>
+              <p class="text-xs text-gray-600"></p>
+              <p class="text-xs text-gray-600"></p>
             </div>
           </div>
         </div>
@@ -264,52 +246,44 @@ if (!isset($_SESSION['user'])) {
           <h3 class="text-xl font-bold mb-4">Upcoming Events</h3>
           <div class="space-y-4">
             <div class="border-l-4 border-red-500 pl-3 py-2">
-              <p class="font-semibold text-sm">Database Project Due</p>
-              <p class="text-xs text-gray-600">Oct 24, 11:59 PM</p>
-              <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">2 days left</span>
+              <p class="font-semibold text-sm">.</p>
+              <p class="text-xs text-gray-600">.</p>
+              <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">.</span>
             </div>
 
             <div class="border-l-4 border-green-500 pl-3 py-2">
-              <p class="font-semibold text-sm">Web Dev Quiz</p>
-              <p class="text-xs text-gray-600">Oct 25, 10:00 AM</p>
-              <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">3 days</span>
+              <p class="font-semibold text-sm">.</p>
+              <p class="text-xs text-gray-600">.</p>
+              <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">.</span>
             </div>
 
             <div class="border-l-4 border-red-500 pl-3 py-2">
-              <p class="font-semibold text-sm">Portfolio Assignment Due</p>
-              <p class="text-xs text-gray-600">Oct 28, 11:59 PM</p>
-              <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">6 days</span>
+              <p class="font-semibold text-sm">.</p>
+              <p class="text-xs text-gray-600">.</p>
+              <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">.</span>
             </div>
 
             <div class="border-l-4 border-orange-500 pl-3 py-2">
-              <p class="font-semibold text-sm">Midterm Exam - Software Eng</p>
-              <p class="text-xs text-gray-600">Oct 29, 9:00 AM</p>
-              <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">7 days</span>
+              <p class="font-semibold text-sm">.</p>
+              <p class="text-xs text-gray-600">.</p>
+              <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">.</span>
             </div>
 
             <div class="border-l-4 border-purple-500 pl-3 py-2">
-              <p class="font-semibold text-sm">Tech Talk: AI Development</p>
-              <p class="text-xs text-gray-600">Oct 30, 3:00 PM</p>
-              <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">8 days</span>
+              <p class="font-semibold text-sm">.</p>
+              <p class="text-xs text-gray-600">.</p>
+              <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">.</span>
             </div>
           </div>
         </div>
 
         <!-- Weekly Class Schedule -->
         <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-xl font-bold mb-4">Regular Schedule</h3>
+          <h3 class="text-xl font-bold mb-4">Registrar Schedule Weekdays</h3>
           <div class="space-y-2 text-sm">
             <div class="flex justify-between py-2 border-b">
-              <span class="font-semibold">Monday</span>
-              <span class="text-gray-600">9AM - 5PM</span>
-            </div>
-            <div class="flex justify-between py-2 border-b">
-              <span class="font-semibold">Wednesday</span>
-              <span class="text-gray-600">9AM - 5PM</span>
-            </div>
-            <div class="flex justify-between py-2 border-b">
-              <span class="font-semibold">Friday</span>
-              <span class="text-gray-600">10AM - 4PM</span>
+              <span class="font-semibold">Monday to Friday</span>
+              <span class="text-gray-600">9AM - 4PM</span>
             </div>
           </div>
         </div>
