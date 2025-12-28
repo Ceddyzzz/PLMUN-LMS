@@ -1,295 +1,157 @@
 <?php
 session_start();
 if (!isset($_SESSION['user'])) {
-  header("Location: login.php");
-  exit();
+    header("Location: login.php");
+    exit();
+}
+
+include "includes/db_connect.php";  // Your database connection
+
+// Get current month/year
+$month = isset($_GET['month']) ? $_GET['month'] : date("n");
+$year  = isset($_GET['year']) ? $_GET['year'] : date("Y");
+
+// Philippine Holidays
+$philHolidays = [
+    "01-01" => ["New Year's Day", "#ef4444"],
+    "04-09" => ["Araw ng Kagitingan", "#f97316"],
+    "05-01" => ["Labor Day", "#10b981"],
+    "06-12" => ["Independence Day", "#3b82f6"],
+    "11-01" => ["All Saints Day", "#8b5cf6"],
+    "12-25" => ["Christmas Day", "#ef4444"],
+    "12-30" => ["Rizal Day", "#3b82f6"]
+];
+
+// Fetch user events
+$sql = "SELECT * FROM events WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+
+$userId = $_SESSION['user'];
+
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$userEvents = $result->fetch_all(MYSQLI_ASSOC);
+
+// Group events by date
+$eventsByDate = [];
+foreach ($userEvents as $event) {
+    $eventsByDate[$event['event_date']][] = $event;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Calendar | PLMUN LMS</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    .calendar-day {
-      min-height: 100px;
-    }
-    .event-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Calendar | PLMUN LMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100">
-  
 <header class="bg-blue-900 text-white p-4">
   <div class="max-w-7xl mx-auto flex justify-between items-center">
     <h1 class="text-xl font-bold">PLMUN LMS</h1>
-    <ul class="flex space-x-6">
-        <li><a href="/PLMUN%20LMS/dashboard.php" class="hover:text-yellow-300">Dashboard</a></li>
-        <li><a href="/PLMUN%20LMS/announcement.php" class="hover:text-yellow-300">Announcements</a></li>
-        <li><a href="/PLMUN%20LMS/chat.php" class="hover:text-yellow-300">Chat</a></li>
-        <li><a href="/PLMUN%20LMS/assignment.php" class="hover:text-yellow-300">Assignments</a></li>
-        <li><a href="/PLMUN%20LMS/calendar.php" class="hover:text-yellow-300">Calendar</a></li>
-        <li><a href="/PLMUN%20LMS/e-books.php" class="hover:text-yellow-300">E-Books</a></li>
-        <li><a href="/PLMUN%20LMS/quiz.php" class="hover:text-yellow-300">Quiz</a></li>
-        <li><a href="/PLMUN%20LMS/logout.php" class="hover:text-yellow-300">Logout</a></li>
-    </ul>
+    <nav>
+      <ul class="flex space-x-6">
+      <li><a href="/PLMUN%20LMS/dashboard.php" class="hover:text-yellow-300">Dashboard</a></li>
+      <li><a href="/PLMUN%20LMS/announcement.php" class="hover:text-yellow-300">Announcements</a></li>
+      <li><a href="/PLMUN%20LMS/chat.php" class="hover:text-yellow-300">Chat</a></li>
+      <li><a href="/PLMUN%20LMS/calendar.php" class="hover:text-yellow-300">Calendar</a></li>
+      <li><a href="/PLMUN%20LMS/e-books.php" class="hover:text-yellow-300">E-Books</a></li>
+      <li><a href="/PLMUN%20LMS/sections.php" class="hover:text-yellow-300 transition">Assign Subjects</a></li>
+      <li><a href="/PLMUN%20LMS/sections.php" class="hover:text-yellow-300 transition">Sections</a></li>
+      <li><a href="/PLMUN%20LMS/logout.php" class="hover:text-yellow-300">Logout</a></li>
+      </ul>
+    </nav>
   </div>
 </header>
 
-  <main class="p-6 max-w-7xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold">📅 Calendar</h2>
-      <div class="flex items-center space-x-4">
-        <button class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">← Previous</button>
-        <span class="text-xl font-semibold">November 2025</span>
-        <button class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">Next →</button>
+<main class="max-w-5xl mx-auto p-6">
+  <div class="flex justify-between items-center">
+    <a href="?month=<?= $month-1 ?>&year=<?= $year ?>" class="px-3 py-2 bg-white shadow rounded">← Prev</a>
+    <h2 class="text-2xl font-bold">
+      <?= date("F Y", strtotime("$year-$month-01")) ?>
+    </h2>
+    <a href="?month=<?= $month+1 ?>&year=<?= $year ?>" class="px-3 py-2 bg-white shadow rounded">Next →</a>
+  </div>
+
+  <div class="grid grid-cols-7 text-center font-bold mt-6">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+
+  <div class="grid grid-cols-7 gap-2 mt-2">
+    <?php
+    $firstDay = date("w", strtotime("$year-$month-01"));
+    $daysInMonth = date("t", strtotime("$year-$month-01"));
+
+    // blank days
+    for ($i=0; $i<$firstDay; $i++) echo "<div></div>";
+
+    // days
+    for ($day = 1; $day <= $daysInMonth; $day++):
+        $dateStr = "$year-$month-" . str_pad($day, 2, "0", STR_PAD_LEFT);
+        $md = date("m-d", strtotime($dateStr));
+    ?>
+      <div class="bg-white p-2 h-32 border shadow rounded relative hover:bg-blue-50 cursor-pointer"
+           onclick="openModal('<?= $dateStr ?>')">
+
+        <p class="font-semibold text-sm"><?= $day ?></p>
+
+        <!-- Philippine holiday -->
+        <?php if (isset($philHolidays[$md])): ?>
+          <div class="text-xs bg-red-100 text-red-700 px-1 rounded">
+            <?= $philHolidays[$md][0] ?>
+          </div>
+        <?php endif; ?>
+
+        <!-- User events -->
+        <?php if (isset($eventsByDate[$dateStr])): ?>
+          <?php foreach ($eventsByDate[$dateStr] as $e): ?>
+            <div class="text-xs mt-1 px-1 rounded" style="background: <?= $e['color'] ?>20; color: <?= $e['color'] ?>">
+              <?= htmlspecialchars($e['title']) ?>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
       </div>
+    <?php endfor; ?>
+  </div>
+</main>
+
+<!-- Add Event Modal -->
+<div id="eventModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+  <form action="api/save_event.php" method="POST" class="bg-white p-6 rounded shadow w-96">
+    <h3 class="text-xl font-bold mb-4">Add Event</h3>
+
+    <input type="hidden" name="event_date" id="event_date">
+
+    <label class="block font-medium">Title</label>
+    <input type="text" name="title" class="w-full border p-2 rounded mb-3" required>
+
+    <label class="block font-medium">Description</label>
+    <textarea name="description" class="w-full border p-2 rounded mb-3"></textarea>
+
+    <label class="block font-medium">Color</label>
+    <input type="color" name="color" class="mb-3">
+
+    <div class="flex justify-end space-x-2">
+      <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+      <button class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
     </div>
+  </form>
+</div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Calendar Grid -->
-      <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
-        <!-- Calendar Header -->
-        <div class="grid grid-cols-7 gap-2 mb-2">
-          <div class="text-center font-bold text-gray-600 py-2">Sun</div>
-          <div class="text-center font-bold text-gray-600 py-2">Mon</div>
-          <div class="text-center font-bold text-gray-600 py-2">Tue</div>
-          <div class="text-center font-bold text-gray-600 py-2">Wed</div>
-          <div class="text-center font-bold text-gray-600 py-2">Thu</div>
-          <div class="text-center font-bold text-gray-600 py-2">Fri</div>
-          <div class="text-center font-bold text-gray-600 py-2">Sat</div>
-        </div>
+<script>
+function openModal(date) {
+    document.getElementById("event_date").value = date;
+    document.getElementById("eventModal").classList.remove("hidden");
+}
 
-        <!-- Calendar Days -->
-        <div class="grid grid-cols-7 gap-2">
-          <!-- Previous month days -->
-          <div class="calendar-day border rounded p-2 bg-gray-50 text-gray-400">
-            <span class="text-sm">29</span>
-          </div>
-          <div class="calendar-day border rounded p-2 bg-gray-50 text-gray-400">
-            <span class="text-sm">30</span>
-          </div>
+function closeModal() {
+    document.getElementById("eventModal").classList.add("hidden");
+}
+</script>
 
-          <!-- Current month days -->
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">1</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">2</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">3</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">4</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">5</span>
-          </div>
-
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">6</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">7</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">8</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">9</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">10</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">11</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">12</span>
-          </div>
-
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">13</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">14</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">15</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">16</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">17</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">18</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">19</span>
-          </div>
-
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">20</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">21</span>
-          </div>
-          <!-- Today -->
-          <div class="calendar-day border-2 border-blue-600 bg-blue-50 rounded p-2">
-            <span class="text-sm font-bold text-blue-600">22</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">23</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">24</span>
-            <div class="mt-1">
-              <div class="text-xs bg-red-100 text-red-800 px-1 py-0.5 rounded mb-1">Due 11PM</div>
-            </div>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">25</span>
-            <div class="mt-1">
-              <div class="text-xs bg-green-100 text-green-800 px-1 py-0.5 rounded mb-1">Quiz 10AM</div>
-            </div>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">26</span>
-          </div>
-
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">27</span>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">28</span>
-            <div class="mt-1">
-              <div class="text-xs bg-red-100 text-red-800 px-1 py-0.5 rounded mb-1">Due 11PM</div>
-            </div>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">29</span>
-            <div class="mt-1">
-              <div class="text-xs bg-orange-100 text-orange-800 px-1 py-0.5 rounded mb-1">Exam 9AM</div>
-            </div>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">30</span>
-            <div class="mt-1">
-              <div class="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded mb-1">Lab 2PM</div>
-              <div class="text-xs bg-purple-100 text-purple-800 px-1 py-0.5 rounded">Event 3PM</div>
-            </div>
-          </div>
-          <div class="calendar-day border rounded p-2 hover:bg-blue-50 cursor-pointer">
-            <span class="text-sm font-semibold">31</span>
-          </div>
-
-          <!-- Next month days -->
-          <div class="calendar-day border rounded p-2 bg-gray-50 text-gray-400">
-            <span class="text-sm">1</span>
-          </div>
-          <div class="calendar-day border rounded p-2 bg-gray-50 text-gray-400">
-            <span class="text-sm">2</span>
-          </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="mt-6 pt-4 border-t flex flex-wrap gap-4 text-sm">
-          <div class="flex items-center space-x-2">
-            <span class="event-dot bg-blue-500"></span>
-            <span>Lab Session</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="event-dot bg-red-500"></span>
-            <span>Assignment Due</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="event-dot bg-green-500"></span>
-            <span>Quiz</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="event-dot bg-orange-500"></span>
-            <span>Exam</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="event-dot bg-purple-500"></span>
-            <span>Event</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Upcoming Events Sidebar -->
-      <div class="space-y-6">
-        <!-- Today's Events -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-xl font-bold mb-4">Today's Schedule</h3>
-          <div class="space-y-3">
-            <div class="border-l-4 border-purple-500 pl-3 py-2">
-              <p class="font-semibold text-sm"></p>
-              <p class="text-xs text-gray-600"></p>
-              <p class="text-xs text-gray-600"></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upcoming Events -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-xl font-bold mb-4">Upcoming Events</h3>
-          <div class="space-y-4">
-            <div class="border-l-4 border-red-500 pl-3 py-2">
-              <p class="font-semibold text-sm">.</p>
-              <p class="text-xs text-gray-600">.</p>
-              <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">.</span>
-            </div>
-
-            <div class="border-l-4 border-green-500 pl-3 py-2">
-              <p class="font-semibold text-sm">.</p>
-              <p class="text-xs text-gray-600">.</p>
-              <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">.</span>
-            </div>
-
-            <div class="border-l-4 border-red-500 pl-3 py-2">
-              <p class="font-semibold text-sm">.</p>
-              <p class="text-xs text-gray-600">.</p>
-              <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">.</span>
-            </div>
-
-            <div class="border-l-4 border-orange-500 pl-3 py-2">
-              <p class="font-semibold text-sm">.</p>
-              <p class="text-xs text-gray-600">.</p>
-              <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">.</span>
-            </div>
-
-            <div class="border-l-4 border-purple-500 pl-3 py-2">
-              <p class="font-semibold text-sm">.</p>
-              <p class="text-xs text-gray-600">.</p>
-              <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">.</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Weekly Class Schedule -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-xl font-bold mb-4">Registrar Schedule Weekdays</h3>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between py-2 border-b">
-              <span class="font-semibold">Monday to Friday</span>
-              <span class="text-gray-600">9AM - 4PM</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </main>
 </body>
 </html>
