@@ -86,7 +86,8 @@ $conn->close();
       <li><a href="/PLMUN%20LMS/chat.php" class="hover:text-yellow-300">Chat</a></li>
       <li><a href="/PLMUN%20LMS/assignment.php" class="hover:text-yellow-300">Assignments</a></li>
       <li><a href="/PLMUN%20LMS/calendar.php" class="hover:text-yellow-300">Calendar</a></li>
-      <li><a href="/PLMUN%20LMS/ebooks.php" class="hover:text-yellow-300">E-Books</a></li>
+      <li><a href="/PLMUN%20LMS/e-books.php" class="hover:text-yellow-300">E-Books</a></li>
+      <li><a href="/PLMUN%20LMS/sections.php" class="hover:text-yellow-300 transition">Sections</a></li>
       <li><a href="/PLMUN%20LMS/quiz.php" class="hover:text-yellow-300">Quiz</a></li>
       <li><a href="/PLMUN%20LMS/logout.php" class="hover:text-yellow-300">Logout</a></li>
     </ul>
@@ -94,6 +95,26 @@ $conn->close();
 </header>
 
   <main class="p-6 max-w-7xl mx-auto">
+    
+    <!-- Success/Error Messages -->
+    <?php if (isset($_GET['deleted'])): ?>
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+        ✅ Assignment deleted successfully!
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'unauthorized'): ?>
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        ❌ You don't have permission to delete that assignment.
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'delete_failed'): ?>
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        ❌ Failed to delete assignment. Please try again.
+      </div>
+    <?php endif; ?>
+    
     <!-- Header with role indicator -->
     <div class="flex justify-between items-center mb-6">
       <div>
@@ -355,7 +376,7 @@ $conn->close();
     }
     
     function viewSubmissions(assignmentId) {
-      window.location.href = 'view_submissions.php?id=' + assignmentId;
+      window.location.href = 'api/view_submissions.php?id=' + assignmentId;
     }
     
     function editAssignment(assignmentId) {
@@ -364,12 +385,12 @@ $conn->close();
     
     function deleteAssignment(assignmentId) {
       if (confirm('Are you sure you want to delete this assignment? This cannot be undone.')) {
-        window.location.href = 'delete_assignment.php?id=' + assignmentId;
+        window.location.href = 'api/delete_assignment.php?id=' + assignmentId;
       }
     }
     
     function viewAssignment(assignmentId) {
-      window.location.href = 'view_assignment.php?id=' + assignmentId;
+      window.location.href = 'api/view_submissions.php?id=' + assignmentId;
     }
     
     function submitAssignment(assignmentId) {
