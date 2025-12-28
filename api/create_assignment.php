@@ -1,54 +1,53 @@
 <?php
 session_start();
+header('Content-Type: application/json');
 
 if (!isset($_SESSION['user'])) {
-  header("Location: ../login.php");
+  echo json_encode(['error' => 'Not authenticated']);
   exit();
 }
 
 include '../includes/db_connect.php';
 
-// Get current user and check if teacher
-$stmt = $conn->prepare("SELECT id, role FROM users WHERE email = ?");
+$input = json_decode(file_get_contents('php://input'), true);
+$request_id = (int)$input['request_id'];
+
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $_SESSION['user']);
 $stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+$current_user = $stmt->get_result()->fetch_assoc();
+$current_user_id = $current_user['id'];
 $stmt->close();
 
-// Only teachers can create assignments
-if ($user['role'] !== 'teacher') {
-  die("Access denied: Only teachers can create assignments");
+// Get request details
+$stmt = $conn->prepare("SELECT sender_id, receiver_id FROM friend_requests 
+                        WHERE id = ? AND receiver_id = ? AND status = 'pending'");
+$stmt->bind_param("ii", $request_id, $current_user_id);
+$stmt->execute();
+$request = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$request) {
+  echo json_encode(['success' => false, 'error' => 'Request not found']);
+  exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $title = trim($_POST['title']);
-  $description = trim($_POST['description']);
-  $course = trim($_POST['course']);
-  $points = (int)$_POST['points'];
-  $due_date = $_POST['due_date'];
-  $teacher_id = $user['id'];
-  
-  // Validate inputs
-  if (empty($title) || empty($description) || empty($course) || empty($due_date)) {
-    die("All fields are required");
-  }
-  
-  // Insert assignment
-  $stmt = $conn->prepare("INSERT INTO assignments (title, description, course, teacher_id, points, due_date) VALUES (?, ?, ?, ?, ?, ?)");
-  $stmt->bind_param("ssssis", $title, $description, $course, $teacher_id, $points, $due_date);
-  
-  if ($stmt->execute()) {
-    $stmt->close();
-    $conn->close();
-    header("Location: ../assignment.php?success=created");
-    exit();
-  } else {
-    die("Error creating assignment: " . $conn->error);
-  }
-}
+// Create friendship (always store smaller ID first)
+$user1 = min($request['sender_id'], $request['receiver_id']);
+$user2 = max($request['sender_id'], $request['receiver_id']);
+
+$stmt = $conn->prepare("INSERT IGNORE INTO friendships (user1_id, user2_id) VALUES (?, ?)");
+$stmt->bind_param("ii", $user1, $user2);
+$stmt->execute();
+$stmt->close();
+
+// Update request status
+$stmt = $conn->prepare("UPDATE friend_requests SET status = 'accepted' WHERE id = ?");
+$stmt->bind_param("i", $request_id);
+$stmt->execute();
+$stmt->close();
+
+echo json_encode(['success' => true]);
 
 $conn->close();
-header("Location: ../assignment.php");
-exit();
 ?>
