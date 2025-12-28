@@ -1,99 +1,123 @@
 <?php
 session_start();
+
+// Check if user is logged in
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard | PLMUN LMS</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-  <?php include 'includes/header.php'; ?>
-  
-  <main class="p-6 max-w-7xl mx-auto">
-    <h2 class="text-3xl font-bold mb-6">Welcome back, <?php echo htmlspecialchars($_SESSION['user']); ?> 👋</h2>
+// ========== EMERGENCY FIX: Auto-assign role if missing ==========
+if (!isset($_SESSION['role']) || empty(trim($_SESSION['role'] ?? ''))) {
+    $email = $_SESSION['user'];
+    $username = explode('@', $email)[0];
     
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <a href="calendar.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
-        <div class="text-blue-600 text-3xl mb-2">📚</div>
-        <h3 class="text-xl font-bold">5 Courses</h3>
-        <p class="text-gray-600">Active this semester</p>
-      </a>
-      
-      <a href="assignment.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
-        <div class="text-green-600 text-3xl mb-2">✅</div>
-        <h3 class="text-xl font-bold">3 Pending</h3>
-        <p class="text-gray-600">Assignments due</p>
-      </a>
-      
-      <a href="quiz.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
-        <div class="text-purple-600 text-3xl mb-2">📝</div>
-        <h3 class="text-xl font-bold">2 Quizzes</h3>
-        <p class="text-gray-600">Scheduled this week</p>
-      </a>
-      
-      <a href="chat_realtime.php" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition cursor-pointer transform hover:scale-105">
-        <div class="text-orange-600 text-3xl mb-2">💬</div>
-        <h3 class="text-xl font-bold">8 Messages</h3>
-        <p class="text-gray-600">Unread notifications</p>
-      </a>
+    // Determine role from email pattern
+    if (stripos($username, '.dean') !== false) {
+        $_SESSION['role'] = 'dean';
+    } 
+    elseif (stripos($username, '.prof') !== false || stripos($username, '.faculty') !== false || stripos($username, '.teacher') !== false) {
+        $_SESSION['role'] = 'teacher';
+    }
+    elseif (stripos($username, '.chair') !== false || stripos($username, '.pc') !== false) {
+        $_SESSION['role'] = 'program_chair';
+    }
+    elseif (stripos($username, '.admin') !== false) {
+        $_SESSION['role'] = 'admin';
+    }
+    else {
+        $_SESSION['role'] = 'student'; // default for any course codes
+    }
+    
+    error_log("Auto-assigned role '{$_SESSION['role']}' to user: $email");
+}
+// ========== END EMERGENCY FIX ==========
+
+// Get and clean the role
+$role = strtolower(trim($_SESSION['role'] ?? ''));
+
+// If role is still empty, show error
+if (empty($role)) {
+    die("Error: Could not determine user role. Please contact administrator.");
+}
+
+// Route to appropriate dashboard based on role
+switch ($role) {
+    case 'student':
+        if (file_exists('dashboard_student.php')) {
+            include 'dashboard_student.php';
+        } else {
+            die("Student dashboard not found. Please create dashboard_student.php");
+        }
+        break;
+    
+    case 'teacher':
+        if (file_exists('dashboard_teacher.php')) {
+            include 'dashboard_teacher.php';
+        } else {
+            die("Teacher dashboard not found. Please create dashboard_teacher.php");
+        }
+        break;
+    
+    case 'dean':
+        if (file_exists('dashboard_dean.php')) {
+            include 'dashboard_dean.php';
+        } else {
+            die("Dean dashboard not found. Please create dashboard_dean.php");
+        }
+        break;
+    
+    case 'program_chair':
+    case 'programchair': // Handle both formats
+        if (file_exists('dashboard_programchair.php')) {
+            include 'dashboard_programchair.php';
+        } else {
+            die("Program Chair dashboard not found. Please create dashboard_programchair.php");
+        }
+        break;
+    
+    case 'admin':
+        if (file_exists('dashboard_admin.php')) {
+            include 'dashboard_admin.php';
+        } else {
+            die("Admin dashboard not found. Please create dashboard_admin.php");
+        }
+        break;
+    
+    default:
+        // Show clear error instead of falling back to generic dashboard
+        echo "<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Dashboard Error | PLMUN LMS</title>
+  <link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css' rel='stylesheet'>
+</head>
+<body class='bg-gray-100'>";
+        include 'includes/header.php';
+        echo "
+  <main class='p-6 max-w-7xl mx-auto'>
+    <h2 class='text-3xl font-bold mb-6'>Dashboard Error</h2>
+    <div class='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4'>
+      <p class='font-bold'>Invalid User Role</p>
+      <p>Your account has an unrecognized role: <strong>" . htmlspecialchars($role) . "</strong></p>
+      <p class='text-sm mt-2'>Email: " . htmlspecialchars($_SESSION['user'] ?? 'Unknown') . "</p>
+      <p class='mt-4'>Please contact your administrator to fix your account permissions.</p>
     </div>
-
-    <!-- Recent Activity -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-      <h3 class="text-2xl font-bold mb-4">📌 Recent Activity</h3>
-      <div class="space-y-4">
-        <div class="border-l-4 border-blue-500 pl-4 py-2">
-          <p class="font-semibold">New assignment posted in Database Management</p>
-          <p class="text-sm text-gray-600">Due: October 28, 2025</p>
-        </div>
-        <div class="border-l-4 border-green-500 pl-4 py-2">
-          <p class="font-semibold">Quiz scheduled: Web Development Fundamentals</p>
-          <p class="text-sm text-gray-600">October 25, 2025 at 10:00 AM</p>
-        </div>
-        <div class="border-l-4 border-purple-500 pl-4 py-2">
-          <p class="font-semibold">Grade posted for Programming Assignment #2</p>
-          <p class="text-sm text-gray-600">Score: 95/100</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Links -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-bold mb-4">🚀 Quick Actions</h3>
-        <div class="space-y-2">
-          <a href="assignment.php" class="block p-3 bg-blue-50 rounded hover:bg-blue-100 transition cursor-pointer">
-            📤 Submit Assignment
-          </a>
-          <a href="quiz.php" class="block p-3 bg-green-50 rounded hover:bg-green-100 transition cursor-pointer">
-            📝 Take Quiz
-          </a>
-          <a href="e-books.php" class="block p-3 bg-purple-50 rounded hover:bg-purple-100 transition cursor-pointer">
-            📚 Browse E-Books
-          </a>
-          <a href="chat_realtime.php" class="block p-3 bg-orange-50 rounded hover:bg-orange-100 transition cursor-pointer">
-            💬 Message Teacher
-          </a>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-xl font-bold mb-4">📅 Upcoming Events</h3>
-        <ul class="space-y-3 text-gray-700">
-          <li>🔴 <strong>Today</strong> - Lab Session: Data Structures (2:00 PM)</li>
-          <li>🟡 <strong>Tomorrow</strong> - Assignment Due: Web Design Project</li>
-          <li>🟢 <strong>Friday</strong> - Midterm Exam: Software Engineering</li>
-        </ul>
-      </div>
+    
+    <div class='bg-yellow-50 p-4 rounded-lg mt-6'>
+      <p class='font-semibold'>Available Roles:</p>
+      <ul class='list-disc ml-5 mt-2 text-sm'>
+        <li>student</li>
+        <li>teacher</li>
+        <li>dean</li>
+        <li>program_chair</li>
+        <li>admin</li>
+      </ul>
     </div>
   </main>
 </body>
-</html>
+</html>";
+        exit();
+}
+?>
