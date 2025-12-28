@@ -6,7 +6,7 @@ session_start();
 require_once 'database.php';
 
 // OpenAI Configuration - GET YOUR NEW API KEY FROM https://platform.openai.com/api-keys
-// ⚠️ REPLACE THIS KEY - the one below is exposed!
+
 define('OPENAI_API_KEY', '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');
 
 // Site Configuration
